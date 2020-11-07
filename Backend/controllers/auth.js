@@ -1,3 +1,5 @@
+const jwt = require("jsonwebtoken");
+const expressJwt = require("express-jwt");
 const User = require("../models/user");
 const shortId = require("shortid");
 
@@ -26,4 +28,44 @@ exports.signup = (req, res) => {
   });
 };
 
- 
+exports.signin = (req, res) => {
+  const { email, password } = req.body;
+
+  //   check the user
+  User.findOne({ email }).exec((err, user) => {
+    if (err || !user) {
+      return res.status(400).json({
+        error: "User not Found Time to Signin",
+      });
+    }
+    // check password
+    if (!user.authenticate(password)) {
+      return res.status(400).json({
+        error: "Email and password do not match.",
+      });
+    }
+
+    // geneate token
+    const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "1d",
+    });
+    res.cookie("token", token, { expiresIn: "1d" });
+    const { _id, username, name, email, role } = user;
+    return res.json({
+      token,
+      user: { _id, username, name, email, role },
+    });
+  });
+};
+
+exports.signout = (req, res) => {
+  res.clearCookie("token");
+  res.json({
+    message: "Signout success",
+  });
+};
+
+exports.requireSignin = expressJwt({
+  secret: process.env.JWT_SECRET,
+  algorithms: ["HS256"],
+});
