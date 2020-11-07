@@ -1,5 +1,7 @@
 Backend/node_modules
+Backend/.env
 FrontEnd/node_modules
 FrontEnd/.next
-# FrontEnd/config.js
- FrontEnd/next.config.js
+FrontEnd/next.config.js
+#FrontEnd/config.js
+Backend/.env
